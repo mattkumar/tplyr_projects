@@ -101,9 +101,6 @@ server <- function(input, output) {
   
   # table display of the demographics table
   output$main_tlf <- renderReactable({
-    print(row()) 
-    print(other())
-    print(col())
     reactable(dat,
               width = "auto",
               onClick = js_string,
