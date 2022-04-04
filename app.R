@@ -12,6 +12,9 @@ library(survival)
 # source dependencies
 source("www/deps.R")
 
+# load data
+load("www/data.RData")
+
 # ui
 ui <- fluidPage(
   useShinyjs(),
@@ -38,8 +41,6 @@ ui <- fluidPage(
 
 # server
 server <- function(input, output) {
-  # load data
-  load("www/data.RData")
 
     # setup reactives for clicked cells
   # this will be used for data drill downs/visuals
