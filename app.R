@@ -48,6 +48,11 @@ css_string <- HTML(".center2 {
                      font-size: 20px;
                    }
                    
+                   .my_green {
+                     color: #A6E22E;
+                     font-weight: bold;
+                   }
+                   
                    ")
 
 
@@ -59,10 +64,8 @@ ui <- fluidPage(
   br(),
   h1("TLFs, Tplyr and Shiny", 
      align = "center" ),
-  h3("Click on any result cell of the demographics table to view additional, linked TLFs for those subjects",
-     align = "center"),
-  h3("Clicking on any cell in the total column offers by-treatment visualizations",
-     align = "center"),
+  HTML("<h3 style = 'text-align:center'>Click on any <span class = 'my_green'>result cell</span> of the demographics table to view additional, linked TLFs for those subjects</h3>"),
+  HTML("<h3 style = 'text-align:center'>Clicking on any cell in the <strong>total column</strong> offers by-treatment visualizations</h3>"),
   br(),
   div(class = "center2",
       h5('Table 1-1: Demographics (safety analysis set)',
