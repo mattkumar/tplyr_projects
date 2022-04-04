@@ -2,20 +2,54 @@
 library(shiny)
 library(shinyjs)
 library(tidyverse)
+#remotes::install_github("atorus-research/Tplyr@20beb73cd4c202308afbbb57c1f2b6e1590295b7")
 library(Tplyr)
 library(reactable)
 library(reactablefmtr)
 library(haven)
 library(highcharter)
 library(survival)
-
-
-# load data
-load("www/data.RData")
-
-# source dependencies
-source("www/deps.R")
  
+### js for reactable
+js_string <- JS("
+  function(rowInfo, colInfo) {
+   if (window.Shiny) {
+      Shiny.setInputValue('row', { index: rowInfo.index + 1 })
+      Shiny.setInputValue('col', {column: colInfo.id})
+    }}")
+
+### css for shiny
+font_string <- HTML("@import url('https://fonts.googleapis.com/css2?family=Inconsolata&display=swap');")
+
+css_string <- HTML(".center2 {
+                      margin: auto;
+                      width: 50%;
+                      box-shadow: 10px 10px 8px 10px #c1c1c1;
+                      padding: 20px;
+                    }
+                   
+                   h1, h5 {
+                    font-weight: bold;
+                    text-shadow: 2px 2px #c1c1c1;
+                   }
+              
+                   body {
+                    zoom: 0.85;
+                    font-family: Inconsolata;
+                   }
+                   
+                   .rt-td-inner:active, .rt-td-inner:hover {
+                     background-color: #A6E22E !important; 
+                   }
+                   
+                   .shiny-output-error-validation {
+                     color: #A6E22E;
+                     font-weight: bold;
+                     font-size: 20px;
+                   }
+                   
+                   ")
+
 
 # ui
 ui <- fluidPage(
@@ -25,11 +59,22 @@ ui <- fluidPage(
   br(),
   h1("TLFs, Tplyr and Shiny", 
      align = "center" ),
-  h3("Click on any result cell to explore those subjects further",
+  h3("Click on any result cell of the demographics table to view additional, linked TLFs for those subjects",
+     align = "center"),
+  h3("Clicking on any cell in the total column offers by-treatment visualizations",
      align = "center"),
   br(),
   div(class = "center2",
+      h5('Table 1-1: Demographics (safety analysis set)',
+         align = "left"),
       reactableOutput('main_tlf')),
+  br(),
+  br(),
+  hidden(div(class = "center2", 
+             h5('Table 2-1: Adverse Events by System Organ Class, Preferred Term (safety analysis set)',
+                align = "left"),
+             id = "ae_tlf_panel",
+             reactableOutput("ae_sub_tlf"))),
   hidden(
     uiOutput('data_panel')
   ),
@@ -43,8 +88,12 @@ ui <- fluidPage(
 
 # server
 server <- function(input, output) {
-
-    # setup reactives for clicked cells
+  
+  
+  # source dependencies
+  source("www/deps.R")
+  
+  # setup reactives for clicked cells
   # this will be used for data drill downs/visuals
   row <- reactive(dat[input$row$index,1]$row_id)
   other <- reactive(dat[input$row$index,1])
@@ -65,6 +114,7 @@ server <- function(input, output) {
               compact = TRUE,
               defaultColDef = colDef(
                 align = "center",
+                html = TRUE
               ),
               columns = list(
                 row_id = colDef(
@@ -78,17 +128,17 @@ server <- function(input, output) {
                   name = "",
                   align = "left"
                 ),
-                var1_Placebo = colDef(
-                  name = "Placebo N=79"
-                ),
-                var1_Total = colDef(
-                  name = "Total N=234"
+                `var1_Xanomeline Low Dose` = colDef(
+                  name = "Xanomeline Low Dose<br>N=84"
                 ),
                 `var1_Xanomeline High Dose` = colDef(
-                  name = "Xanomeline High Dose N=74"
+                  name = "Xanomeline High Dose<br>N=84"
                 ),
-                `var1_Xanomeline Low Dose` = colDef(
-                  name = "Xanomeline Low Dose N=81"
+                var1_Placebo = colDef(
+                  name = "Placebo<br>N=86"
+                ),
+                var1_Total = colDef(
+                  name = "Total<br>N=254"
                 )
               )
     ) 
@@ -134,8 +184,8 @@ server <- function(input, output) {
                   width = 375,
                   draggable = TRUE,
                   height = "auto",
-                  h5('Subject Data',
-                     align = "center"),
+                  h5('Listing 1-1: Subject listing of Demographics (safety analysis set)',
+                     align = "left"),
                   reactableOutput("drill")
     )
   })
@@ -199,8 +249,8 @@ server <- function(input, output) {
                   width = 375,
                   draggable = TRUE,
                   height = "auto",
-                  h5('Top 5 Frequent AEs',
-                     align = "center"),
+                  h5('Figure 2-1: Top 5 Adverse Events by Preferred Term (safety analysis set)',
+                     align = "left"),
                   highchartOutput("ae_graph")
     )
   })
@@ -270,17 +320,86 @@ server <- function(input, output) {
                   width = 375,
                   draggable = TRUE,
                   height = "auto",
-                  h5('Efficacy Graph',
-                     align = "center"),
+                  h5('Figure 3-1: Time to First Dermatologic Event - Kaplan-Meier (safety analysis set)',
+                     align = "left"),
                   highchartOutput("tte_graph")
     )
   })
   
-  # only show the absolute panels on click
+  output$ae_sub_tlf <- renderReactable({
+
+    validate(
+      need(!(col() %in% c('row_label1','row_label2')),
+           'Select a result cell of the table')
+    )
+
+    # subset clicked data from adae
+    inp <- t %>%
+      get_meta_subset(row(), col()) %>%
+      inner_join(adae)
+
+
+    # build AE table
+    t2 <- tplyr_table(inp, TRT01P) %>%
+      add_layer(
+        group_count(
+          vars(
+            AEBODSYS, AEDECOD
+          )
+        )
+      ) %>%
+      build()
+
+
+    # rough data mgmt
+    t2 <- t2 %>%
+      mutate(row_label2 = Hmisc::capitalize(tolower(row_label2))) %>%
+      mutate(test2 = str_replace_all(row_label2, " ","&nbsp;")) %>%
+      select(row_label1, test2, starts_with("var"))
+
+    # reactable
+    t2 %>%
+      reactable(.,
+                width = "auto",
+                defaultColDef = colDef(html=TRUE),
+                theme = my_theme,
+                groupBy = c('row_label1'),
+                highlight = TRUE,
+                pagination = FALSE,
+                sortable = FALSE,
+                compact = TRUE,
+                columns = list(
+                  row_label1 = colDef(
+                    name = "System Organ Class"
+                  ),
+                  test2 = colDef(
+                    name = "System Organ Class<br>&nbsp;Preferred Term"
+                  ),
+
+                  `var1_Xanomeline High Dose` = colDef(
+                    name = "Xanomeline High Dose",
+                    align = "center"
+                  ),
+                  `var1_Xanomeline Low Dose` = colDef(
+                    name = "Xanomeline Low Dose",
+                    align = "center"
+                  ),
+                  var1_Placebo = colDef(
+                    name = "Placebo",
+                    align = "center"
+                  )
+                )
+      )
+
+  })
+  
+  
+  # only show the panels on click
   observeEvent(col(), {
     show("data_panel")
     show("ae_panel")
     show("tte_panel")
+    show("ae_tlf_panel")
   })
 }
 
