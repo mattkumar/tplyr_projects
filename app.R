@@ -9,11 +9,13 @@ library(haven)
 library(highcharter)
 library(survival)
 
-# source dependencies
-source("www/deps.R")
 
 # load data
 load("www/data.RData")
+
+# source dependencies
+source("www/deps.R")
+ 
 
 # ui
 ui <- fluidPage(
