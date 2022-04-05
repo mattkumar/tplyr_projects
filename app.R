@@ -181,7 +181,7 @@ server <- function(input, output) {
                   class = "panel panel-default center2",
                   top = 300,
                   right = 55,
-                  width = 375,
+                  width = 460,
                   draggable = TRUE,
                   height = "auto",
                   h5('Listing 1-1: Subject listing of Demographics (safety analysis set)',
@@ -199,45 +199,83 @@ server <- function(input, output) {
            'Select a result cell of the table')
     )
     
-    # subset + process clicked data
     ae_data <- t %>%
-      get_meta_subset(row(), col()) %>%
-      inner_join(adae) %>%
+      get_meta_subset("c1_1", "var1_Total") %>%
+      inner_join(adae, by = c('USUBJID' = 'USUBJID')) %>%
       select(USUBJID, AEDECOD, AESEV) %>%
       count(AEDECOD, sort = TRUE) %>%
       slice(1:5) %>%
       select(AEDECOD) %>%
       inner_join(adae) %>%
-      count(AEDECOD, AESEV) 
+      inner_join(adsl %>% select(USUBJID, TRT01P)) %>%
+      count(AEDECOD, AESEV, TRT01P) 
     
-    # visualize top 5 AEDECODs, by severity
-      hchart(
-        ae_data,
-        type = "column", 
-        hcaes(
-          x = AEDECOD, 
-          y = n, 
-          group = AESEV
+    if(str_detect(col(), "Total")) {
+      
+      ae_data %>% 
+        group_by(AEDECOD,TRT01P) %>% 
+        summarize(n = sum(n)) %>%
+        hchart(
+          .,
+          type = "column", 
+          hcaes(
+            x = AEDECOD, 
+            y = n, 
+            group = TRT01P
           )
         ) %>%
-      hc_add_theme(
-        hc_theme_monokai()
-      ) %>%
-      hc_xAxis(
-        labels = list(
-          style = list(
-            color = "#FFF"
+        hc_add_theme(
+          hc_theme_monokai()
+        ) %>%
+        hc_xAxis(
+          labels = list(
+            style = list(
+              color = "#FFF"
+            )
           )
-        )
-      ) %>%
-      hc_yAxis(
-        labels = list(
-          style = list(
-            color = "#FFF"
+        ) %>%
+        hc_yAxis(
+          labels = list(
+            style = list(
+              color = "#FFF"
+            )
           )
-        )
-      )
+        ) 
         
+      
+    } else { 
+        
+      # visualize top 5 AEDECODs, by severity
+      ae_data %>% 
+        group_by(AEDECOD,AESEV) %>% 
+        summarize(n = sum(n)) %>%
+        hchart(
+          ae_data,
+          type = "column", 
+          hcaes(
+            x = AEDECOD, 
+            y = n, 
+            group = AESEV
+          )
+        ) %>%
+          hc_add_theme(
+            hc_theme_monokai()
+          ) %>%
+          hc_xAxis(
+            labels = list(
+              style = list(
+                color = "#FFF"
+              )
+            )
+          ) %>%
+          hc_yAxis(
+            labels = list(
+              style = list(
+                color = "#FFF"
+              )
+            )
+          )
+      }
   })
   
   # renderUI that shows the AE graph
@@ -246,7 +284,7 @@ server <- function(input, output) {
                   class = "panel panel-default center2",
                   top = 550,
                   left = 55,
-                  width = 375,
+                  width = 460,
                   draggable = TRUE,
                   height = "auto",
                   h5('Figure 2-1: Top 5 Adverse Events by Preferred Term (safety analysis set)',
@@ -317,7 +355,7 @@ server <- function(input, output) {
                   class = "panel panel-default center2",
                   top = 30,
                   left = 55,
-                  width = 375,
+                  width = 460,
                   draggable = TRUE,
                   height = "auto",
                   h5('Figure 3-1: Time to First Dermatologic Event - Kaplan-Meier (safety analysis set)',
