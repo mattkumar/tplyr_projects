@@ -68,13 +68,13 @@ ui <- fluidPage(
   HTML("<h3 style = 'text-align:center'>Clicking on any cell in the <strong>total column</strong> offers by-treatment visualizations</h3>"),
   br(),
   div(class = "center2",
-      h5('Table 1-1: Demographics (safety analysis set)',
+      h5('Table 1-1: Demographics <<safety analysis set>>',
          align = "left"),
       reactableOutput('main_tlf')),
   br(),
   br(),
   hidden(div(class = "center2", 
-             h5('Table 2-1: Adverse Events by System Organ Class, Preferred Term (safety analysis set)',
+             h5('Table 2-1: Adverse Events by System Organ Class, Preferred Term <<safety analysis set>>',
                 align = "left"),
              id = "ae_tlf_panel",
              reactableOutput("ae_sub_tlf"))),
@@ -162,7 +162,7 @@ server <- function(input, output) {
                   color = "#A6E22E"
                 ),
                 theme = my_theme2,
-                defaultPageSize = 10,
+                defaultPageSize = 20,
                 highlight = FALSE,
                 compact = TRUE,
                 defaultColDef = colDef(
@@ -179,12 +179,12 @@ server <- function(input, output) {
   output$data_panel <- renderUI({
     absolutePanel(id = "controls",
                   class = "panel panel-default center2",
-                  top = 300,
+                  top = 30,
                   right = 55,
                   width = 460,
                   draggable = TRUE,
                   height = "auto",
-                  h5('Listing 1-1: Subject listing of Demographics (safety analysis set)',
+                  h5('Listing 1-1: Subject listing of Demographics <<safety analysis set>>',
                      align = "left"),
                   reactableOutput("drill")
     )
@@ -247,10 +247,10 @@ server <- function(input, output) {
         
       # visualize top 5 AEDECODs, by severity
       ae_data %>% 
-        group_by(AEDECOD,AESEV) %>% 
+        group_by(AEDECOD, AESEV) %>% 
         summarize(n = sum(n)) %>%
         hchart(
-          ae_data,
+          .,
           type = "column", 
           hcaes(
             x = AEDECOD, 
@@ -287,7 +287,7 @@ server <- function(input, output) {
                   width = 460,
                   draggable = TRUE,
                   height = "auto",
-                  h5('Figure 2-1: Top 5 Adverse Events by Preferred Term (safety analysis set)',
+                  h5('Figure 2-1: Top 5 Adverse Events by Preferred Term <<safety analysis set>>',
                      align = "left"),
                   highchartOutput("ae_graph")
     )
@@ -358,7 +358,7 @@ server <- function(input, output) {
                   width = 460,
                   draggable = TRUE,
                   height = "auto",
-                  h5('Figure 3-1: Time to First Dermatologic Event - Kaplan-Meier (safety analysis set)',
+                  h5('Figure 3-1: Time to First Dermatologic Event - Kaplan-Meier <<safety analysis set>>',
                      align = "left"),
                   highchartOutput("tte_graph")
     )
