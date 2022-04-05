@@ -1,5 +1,20 @@
 ### Various assets used throughout the app
 
+### Data
+# adsl <- haven::read_xpt(paste0("https://github.com/phuse-org/TestDataFactory/",
+#                                "raw/main/Updated/TDF_ADaM/adsl.xpt")) %>%
+#   filter(SAFFL == "Y")
+# 
+# adtte <- haven::read_xpt(paste0("https://github.com/phuse-org/TestDataFactory/",
+#                                 "raw/main/Updated/TDF_ADaM/adtte.xpt"))
+# 
+# adae <- haven::read_xpt(paste0("https://github.com/phuse-org/TestDataFactory/",
+#                                "raw/main/Updated/TDF_ADaM/adae.xpt"))
+
+adsl  <- readRDS(file = "www/adsl.RDS")
+adae  <- readRDS(file = "www/adae.RDS")
+adtte <- readRDS(file = "www/adtte.RDS")
+
 ### Tplyr defaults
 options(
   tplyr.count_layer_default_formats =
@@ -81,61 +96,3 @@ my_theme2 <- reactableTheme(
   )
 )
 
-### js for reactable
-js_string <- JS("
-  function(rowInfo, colInfo) {
-   if (window.Shiny) {
-      Shiny.setInputValue('row', { index: rowInfo.index + 1 })
-      Shiny.setInputValue('col', {column: colInfo.id})
-    }}")
-
-### css for shiny
-font_string <- HTML("@import url('https://fonts.googleapis.com/css2?family=Inconsolata&display=swap');")
-
-css_string <- HTML(".center2 {
-                      margin: auto;
-                      width: 50%;
-                      box-shadow: 10px 10px 8px 10px #c1c1c1;
-                      padding: 20px;
-                    }
-                   
-                   h1, h5 {
-                    font-weight: bold;
-                    text-shadow: 2px 2px #c1c1c1;
-                   }
-              
-                   body {
-                    zoom: 0.85;
-                    font-family: Inconsolata;
-                   }
-                   
-                   .rt-td-inner:active, .rt-td-inner:hover {
-                     background-color: #A6E22E !important; 
-                   }
-                   
-                   .shiny-output-error-validation {
-                     color: #A6E22E;
-                     font-weight: bold;
-                     font-size: 20px;
-                   }
-                   
-                   ")
-
-
-# R version 4.1.2 (2021-11-01)
-# Platform: x86_64-w64-mingw32/x64 (64-bit)
-# Running under: Windows 10 x64 (build 19044)
-# 
-# Matrix products: default
-# 
-# locale:
-# [1] LC_COLLATE=English_Canada.1252  LC_CTYPE=English_Canada.1252   
-# [3] LC_MONETARY=English_Canada.1252 LC_NUMERIC=C                   
-# [5] LC_TIME=English_Canada.1252    
-#
-# other attached packages:
-# [1] survival_3.2-13      highcharter_0.9.4    haven_2.4.3          reactablefmtr_2.0.0 
-# [5] reactable_0.2.3.9000 Tplyr_0.4.4          forcats_0.5.1        stringr_1.4.0       
-# [9] dplyr_1.0.7          purrr_0.3.4          readr_2.1.1          tidyr_1.1.4         
-# [13] tibble_3.1.6        ggplot2_3.3.5        tidyverse_1.3.1      shinyjs_2.1.0       
-# [17] shiny_1.7.1         
