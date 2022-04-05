@@ -1,0 +1,29 @@
+ae_data %>% 
+  group_by(AEDECOD,TRT01P) %>% 
+  summarize(n = sum(n)) %>%
+  hchart(
+   .,
+    type = "column", 
+    hcaes(
+      x = AEDECOD, 
+      y = n, 
+      group = TRT01P
+    )
+  ) %>%
+    hc_add_theme(
+      hc_theme_monokai()
+    ) %>%
+    hc_xAxis(
+      labels = list(
+        style = list(
+          color = "#FFF"
+        )
+      )
+    ) %>%
+    hc_yAxis(
+      labels = list(
+        style = list(
+          color = "#FFF"
+        )
+      )
+    ) 
