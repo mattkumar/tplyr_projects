@@ -197,7 +197,7 @@ server <- function(input, output) {
 
     # subset clicked data from adae
     inp <- t %>%
-      get_meta_subset(row(), "var1_Total") %>%
+      get_meta_subset(row1(), "var1_Total") %>%
         inner_join(adae)
 
 
