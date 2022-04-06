@@ -34,7 +34,7 @@ css_string <- HTML(".center2 {
                    }
               
                    body {
-                    zoom: 0.85;
+                    zoom: 0.80;
                     font-family: Inconsolata;
                    }
                    
